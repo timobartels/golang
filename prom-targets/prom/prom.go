@@ -1,13 +1,16 @@
+// Package prom provides a function to read discovered targets from Prometheus server
 package prom
 
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
 )
 
+// PromTargets custom type keeps the JSON decoded from Prometheus /api/v1/targets endpoint
 type PromTargets struct {
 	Status string `json:"status"`
 	Data   struct {
@@ -33,6 +36,8 @@ type PromTargets struct {
 	} `json:"data"`
 }
 
+// GetTargets reads all discovered targets from provided Prometheus URL /api/v1/targets endpoint.
+// It will return the custom type PromTargets to the calling function for further processing.
 func GetTargets(promUrl string) (PromTargets, error) {
 
 	url := promUrl + "/api/v1/targets"
@@ -56,6 +61,9 @@ func GetTargets(promUrl string) (PromTargets, error) {
 	jsonerr := json.Unmarshal(jsonresp, &data)
 	if jsonerr != nil {
 		return data, jsonerr
+	}
+	for _, v := range data.Data.ActiveTargets {
+		fmt.Println("Health: ", v.Health)
 	}
 	return data, nil
 }
