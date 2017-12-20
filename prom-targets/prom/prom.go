@@ -10,8 +10,8 @@ import (
 	"time"
 )
 
-// PromTargets custom type keeps the JSON decoded from Prometheus /api/v1/targets endpoint
-type PromTargets struct {
+// Targets custom type keeps the JSON decoded from Prometheus /api/v1/targets endpoint
+type Targets struct {
 	Status string `json:"status"`
 	Data   struct {
 		ActiveTargets []struct {
@@ -38,10 +38,10 @@ type PromTargets struct {
 
 // GetTargets reads all discovered targets from provided Prometheus URL /api/v1/targets endpoint.
 // It will return the custom type PromTargets to the calling function for further processing.
-func GetTargets(promUrl string) (PromTargets, error) {
+func GetTargets(promURL string) (Targets, error) {
 
-	url := promUrl + "/api/v1/targets"
-	data := PromTargets{}
+	url := promURL + "/api/v1/targets"
+	data := Targets{}
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return data, errors.New("Unable to connect to the Prometheus server")
@@ -50,11 +50,10 @@ func GetTargets(promUrl string) (PromTargets, error) {
 		Timeout: time.Second * 10,
 	}
 	response, err := client.Do(request)
-	defer response.Body.Close()
-
 	if err != nil {
 		return data, errors.New("Unable to access the Prometheus targets endpoint")
 	}
+	defer response.Body.Close()
 
 	jsonresp, _ := ioutil.ReadAll(response.Body)
 
