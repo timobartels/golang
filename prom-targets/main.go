@@ -18,4 +18,9 @@ func main() {
 	}
 
 	fmt.Println(targets)
+	for _, v := range targets.Data.ActiveTargets {
+		if v.Labels.Job == "DCOS Services Monitoring" {
+			fmt.Println("TaskID:", v.DiscoveredLabels.MarathonTask, "Health:", v.Health)
+		}
+	}
 }
