@@ -44,7 +44,7 @@ func GetTargets(promURL string) (Targets, error) {
 	data := Targets{}
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return data, errors.New("Unable to connect to the Prometheus server")
+		return data, err
 	}
 	client := &http.Client{
 		Timeout: time.Second * 10,
