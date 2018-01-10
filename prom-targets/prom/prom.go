@@ -4,11 +4,23 @@ package prom
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
+
+func LogInit() {
+	// Log as JSON instead of the default ASCII formatter.
+	log.SetFormatter(&log.JSONFormatter{})
+
+	// Output to stdout instead of the default stderr
+	log.SetOutput(os.Stdout)
+	// Only log the warning severity or above.
+	log.SetLevel(log.WarnLevel)
+}
 
 // Targets custom type keeps the JSON decoded from Prometheus /api/v1/targets endpoint
 type Targets struct {
@@ -62,7 +74,12 @@ func GetTargets(promURL string) (Targets, error) {
 		return data, jsonerr
 	}
 	for _, v := range data.Data.ActiveTargets {
-		fmt.Println("Health: ", v.Health)
+		log.WithFields(log.Fields{
+			"marathon-app":  v.DiscoveredLabels.MarathonApp,
+			"target-health": v.Health,
+			"promURL":       promURL,
+			"status":        "up",
+		}).Info("Output from Prometheus response")
 	}
 	return data, nil
 }
