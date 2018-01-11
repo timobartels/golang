@@ -5,14 +5,27 @@ import (
 	"os"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"github.com/timobartels/golang/prom-targets/prom"
 )
 
 func main() {
 
-	promURL := "http://192.168.56.10:9090"
+	// setup config management
+	viper.SetConfigName("config")
+	viper.AddConfigPath(".")
+	viper.SetConfigType("yaml")
+	err := viper.ReadInConfig()
+
+	if err != nil {
+		log.Info("No config file found, using default values")
+	}
+	// set defaults
+	viper.SetDefault("promURL", "http://192.168.56.10:9090")
 
 	prom.LogInit()
+
+	promURL := viper.GetString("promURL")
 
 	targets, err := prom.GetTargets(promURL)
 	if err != nil {
