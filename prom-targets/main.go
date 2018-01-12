@@ -22,8 +22,12 @@ func main() {
 	}
 	// set defaults
 	viper.SetDefault("promURL", "http://192.168.56.10:9090")
+	//	viper.SetDefault("logFormat", "json")
 
-	prom.LogInit()
+	// get and set logFormat
+	logFormat := viper.GetString("logFormat")
+
+	prom.LogInit(logFormat)
 
 	promURL := viper.GetString("promURL")
 

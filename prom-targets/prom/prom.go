@@ -12,9 +12,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func LogInit() {
+func LogInit(logFormat string) {
 	// Log as JSON instead of the default ASCII formatter.
-	log.SetFormatter(&log.JSONFormatter{})
+	if logFormat == "json" {
+		log.SetFormatter(&log.JSONFormatter{})
+	}
 
 	// Output to stdout instead of the default stderr
 	log.SetOutput(os.Stdout)
