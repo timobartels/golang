@@ -1,3 +1,3 @@
 ---
-promURL: "http://amdc-omdui-lx0.amdc.mckinsey.com:9090/prometheus/prometheus"
+promURL: "http://your-prometheus-url-and-port"
 logFormat: json

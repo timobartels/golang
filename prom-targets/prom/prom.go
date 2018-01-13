@@ -21,7 +21,7 @@ func LogInit(logFormat string) {
 	// Output to stdout instead of the default stderr
 	log.SetOutput(os.Stdout)
 	// Only log the warning severity or above.
-	log.SetLevel(log.WarnLevel)
+	log.SetLevel(log.DebugLevel)
 }
 
 // Targets custom type keeps the JSON decoded from Prometheus /api/v1/targets endpoint
@@ -77,6 +77,7 @@ func GetTargets(promURL string) (Targets, error) {
 	}
 	for _, v := range data.Data.ActiveTargets {
 		log.WithFields(log.Fields{
+			"instance":      v.Labels.Instance,
 			"marathon-app":  v.DiscoveredLabels.MarathonApp,
 			"target-health": v.Health,
 			"promURL":       promURL,

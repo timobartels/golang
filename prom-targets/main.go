@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	log "github.com/sirupsen/logrus"
@@ -22,7 +21,6 @@ func main() {
 	}
 	// set defaults
 	viper.SetDefault("promURL", "http://192.168.56.10:9090")
-	//	viper.SetDefault("logFormat", "json")
 
 	// get and set logFormat
 	logFormat := viper.GetString("logFormat")
@@ -31,25 +29,20 @@ func main() {
 
 	promURL := viper.GetString("promURL")
 
-	targets, err := prom.GetTargets(promURL)
-	if err != nil {
+	_, err2 := prom.GetTargets(promURL)
+	if err2 != nil {
 		log.WithFields(log.Fields{
 			"promURL": promURL,
 			"status":  "down",
-		}).Fatal(err)
+		}).Fatal(err2)
 		os.Exit(1)
 	}
 
-	log.WithFields(log.Fields{
-		"promURL": promURL,
-		"status":  "up",
-	}).Info("Successful response from Prometheus API")
-
-	fmt.Println(targets)
-	/*		for _, v := range targets.Data.ActiveTargets {
-				if v.Labels.Job == "DCOS Services Monitoring" {
-					fmt.Println("TaskID:", v.DiscoveredLabels.MarathonTask, "Health:", v.Health)
-				}
+	/*	fmt.Println(targets)
+		for _, v := range targets.Data.ActiveTargets {
+			if v.Labels.Job == "DCOS Services Monitoring" {
+				fmt.Println("TaskID:", v.DiscoveredLabels.MarathonTask, "Health:", v.Health)
 			}
+		}
 	*/
 }
