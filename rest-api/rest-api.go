@@ -37,18 +37,25 @@ func main() {
 	people = append(people, Person{ID: "1", Firstname: "Mike", Lastname: "Brewers"})
 	people = append(people, Person{ID: "2", Firstname: "Jennifer", Lastname: "Myers"})
 
-	// create a new router
-	router := mux.NewRouter()
+	// initialize routes
+	r := Routes()
 
-	// create routes for our endpoints
+	log.Info("HTTP server started and listening on port: ", port)
+
+	// start our server
+	log.Fatal(http.ListenAndServe(port, r))
+
+}
+
+// Routes sets up the routes for our API
+//func Routes() http.Handler {
+func Routes() http.Handler {
+	router := mux.NewRouter()
 	router.HandleFunc("/people", GetPeople).Methods("GET")
 	router.HandleFunc("/people/{id}", GetPerson).Methods("GET")
 	router.HandleFunc("/people/{id}", CreatePerson).Methods("POST")
 	router.HandleFunc("/people/{id}", DeletePerson).Methods("DELETE")
-
-	// start our server
-	log.Fatal(http.ListenAndServe(port, router))
-
+	return router
 }
 
 // GetPeople will output all entries in the people slice
