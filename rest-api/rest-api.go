@@ -72,7 +72,7 @@ func GetPerson(w http.ResponseWriter, r *http.Request) {
 	for _, item := range people {
 		if item.ID == params["id"] {
 			json.NewEncoder(w).Encode(item)
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(http.StatusCreated)
 			return
 		}
 	}
@@ -86,7 +86,7 @@ func CreatePerson(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewDecoder(r.Body).Decode(&person)
 	person.ID = params["id"]
 	people = append(people, person)
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(people)
 }
 
@@ -100,6 +100,6 @@ func DeletePerson(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(people)
 }
