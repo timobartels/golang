@@ -7,15 +7,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetPeople(t *testing.T) {
 
-	router := mux.NewRouter()
-	router.HandleFunc("/people", GetPeople).Methods("GET")
-
+	router := Routes()
 	url := "/people"
 	statusCode := 200
 	people = append(people, Person{ID: "1", Firstname: "John", Lastname: "Doe"})
@@ -31,9 +28,7 @@ func TestGetPeople(t *testing.T) {
 
 func TestCreatePerson(t *testing.T) {
 
-	router := mux.NewRouter()
-	router.HandleFunc("/people/{id}", CreatePerson).Methods("POST")
-
+	router := Routes()
 	url := "/people/2"
 	statusCode := 201
 
@@ -51,9 +46,7 @@ func TestCreatePerson(t *testing.T) {
 
 func TestGetPerson(t *testing.T) {
 
-	router := mux.NewRouter()
-	router.HandleFunc("/people/{id}", GetPerson).Methods("GET")
-
+	router := Routes()
 	url := "/people/1"
 	statusCode := 200
 
@@ -68,9 +61,7 @@ func TestGetPerson(t *testing.T) {
 
 func TestDeletePerson(t *testing.T) {
 
-	router := mux.NewRouter()
-	router.HandleFunc("/people/{id}", DeletePerson).Methods("DELETE")
-
+	router := Routes()
 	url := "/people/2"
 	statusCode := 201
 
