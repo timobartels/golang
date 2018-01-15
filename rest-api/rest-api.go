@@ -72,7 +72,7 @@ func GetPerson(w http.ResponseWriter, r *http.Request) {
 	for _, item := range people {
 		if item.ID == params["id"] {
 			json.NewEncoder(w).Encode(item)
-			w.WriteHeader(http.StatusCreated)
+			w.WriteHeader(http.StatusOK)
 			return
 		}
 	}
