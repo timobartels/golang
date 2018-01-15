@@ -60,15 +60,19 @@ func Routes() http.Handler {
 
 // GetPeople will output all entries in the people slice
 func GetPeople(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(people)
 }
 
 // GetPerson will output only a specific entry
 func GetPerson(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	params := mux.Vars(r)
 	for _, item := range people {
 		if item.ID == params["id"] {
 			json.NewEncoder(w).Encode(item)
+			w.WriteHeader(http.StatusOK)
 			return
 		}
 	}
@@ -76,16 +80,19 @@ func GetPerson(w http.ResponseWriter, r *http.Request) {
 
 // CreatePerson will create a new entry in the people slice
 func CreatePerson(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	params := mux.Vars(r)
 	var person Person
 	_ = json.NewDecoder(r.Body).Decode(&person)
 	person.ID = params["id"]
 	people = append(people, person)
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(people)
 }
 
 // DeletePerson will reshuffle the people slice to overwrite an entry
 func DeletePerson(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	params := mux.Vars(r)
 	for index, item := range people {
 		if item.ID == params["id"] {
@@ -93,5 +100,6 @@ func DeletePerson(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(people)
 }
