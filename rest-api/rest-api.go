@@ -18,24 +18,16 @@ type Person struct {
 }
 
 var people []Person
+var port string
 
 func main() {
-
-	// setup config management
-	viper.SetConfigName("config")
-	viper.AddConfigPath(".")
-	viper.SetConfigType("yaml")
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Fatal("No config file found, terminating program!")
-	}
-	// get details from config file
-	port := viper.GetString("port")
-	port = ":" + port
 
 	// fill out people slice with some dummy data
 	people = append(people, Person{ID: "1", Firstname: "Mike", Lastname: "Brewers"})
 	people = append(people, Person{ID: "2", Firstname: "Jennifer", Lastname: "Myers"})
+
+	// initialize config management
+	ConfigInit()
 
 	// initialize routes
 	r := Routes()
@@ -45,6 +37,19 @@ func main() {
 	// start our server
 	log.Fatal(http.ListenAndServe(port, r))
 
+}
+
+func ConfigInit() {
+
+	viper.SetConfigName("config")
+	viper.AddConfigPath(".")
+	viper.SetConfigType("yaml")
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatal("No config file found, terminating program!")
+	}
+	port = viper.GetString("port")
+	port = ":" + port
 }
 
 // Routes sets up the routes for our API

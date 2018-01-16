@@ -3,12 +3,17 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestConfigInit(t *testing.T) {
+
+	ConfigInit()
+	assert.Equal(t, port, ":8080")
+}
 
 func TestGetPeople(t *testing.T) {
 
@@ -69,8 +74,6 @@ func TestDeletePerson(t *testing.T) {
 	req.Header.Set("content-type", "application/json")
 	res := httptest.NewRecorder()
 	router.ServeHTTP(res, req)
-
-	fmt.Println(res.Body)
 
 	assert.Equal(t, statusCode, res.Code)
 	assert.NotContains(t, string(res.Body.Bytes()), `[{"id":"2","firstname":"Jane","lastname":"Doe"}]`)
