@@ -22,10 +22,6 @@ var port string
 
 func main() {
 
-	// fill out people slice with some dummy data
-	people = append(people, Person{ID: "1", Firstname: "Mike", Lastname: "Brewers"})
-	people = append(people, Person{ID: "2", Firstname: "Jennifer", Lastname: "Myers"})
-
 	// initialize config management
 	ConfigInit()
 
@@ -39,6 +35,7 @@ func main() {
 
 }
 
+// ConfigInit sets up configuration management using viper
 func ConfigInit() {
 
 	viper.SetConfigName("config")
@@ -53,7 +50,6 @@ func ConfigInit() {
 }
 
 // Routes sets up the routes for our API
-//func Routes() http.Handler {
 func Routes() http.Handler {
 	router := mux.NewRouter()
 	router.HandleFunc("/people", GetPeople).Methods("GET")
