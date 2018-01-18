@@ -43,7 +43,7 @@ func ConfigInit() {
 	viper.SetConfigType("yaml")
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Fatal("No config file found, terminating program!")
+		log.Fatal(err)
 	}
 	port = viper.GetString("port")
 	port = ":" + port

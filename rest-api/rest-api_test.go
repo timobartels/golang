@@ -28,7 +28,7 @@ func TestGetPeople(t *testing.T) {
 	router.ServeHTTP(res, req)
 
 	assert.Equal(t, statusCode, res.Code)
-	assert.Contains(t, string(res.Body.Bytes()), `[{"id":"1","firstname":"John","lastname":"Doe"}]`)
+	assert.JSONEq(t, string(res.Body.Bytes()), `[{"id":"1","firstname":"John","lastname":"Doe"}]`)
 }
 
 func TestCreatePerson(t *testing.T) {
@@ -46,7 +46,7 @@ func TestCreatePerson(t *testing.T) {
 	router.ServeHTTP(res, req)
 
 	assert.Equal(t, statusCode, res.Code)
-	assert.Contains(t, string(res.Body.Bytes()), `[{"id":"1","firstname":"John","lastname":"Doe"},{"id":"2","firstname":"Jane","lastname":"Doe"}]`)
+	assert.JSONEq(t, string(res.Body.Bytes()), `[{"id":"1","firstname":"John","lastname":"Doe"},{"id":"2","firstname":"Jane","lastname":"Doe"}]`)
 }
 
 func TestGetPerson(t *testing.T) {
@@ -61,7 +61,7 @@ func TestGetPerson(t *testing.T) {
 	router.ServeHTTP(res, req)
 
 	assert.Equal(t, statusCode, res.Code)
-	assert.Contains(t, string(res.Body.Bytes()), `{"id":"1","firstname":"John","lastname":"Doe"}`)
+	assert.JSONEq(t, string(res.Body.Bytes()), `{"id":"1","firstname":"John","lastname":"Doe"}`)
 }
 
 func TestDeletePerson(t *testing.T) {
