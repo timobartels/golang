@@ -33,26 +33,20 @@ var (
 
 func main() {
 
-	// initialize config management
-	ConfigInit()
-
-	// initialize routes
-	r := Routes()
-
 	log.Info("HTTP server started and listening on port: ", port)
 
 	// start our server
-	log.Fatal(http.ListenAndServe(port, r))
+	log.Fatal(http.ListenAndServe(port, Routes()))
 
 }
 
 func init() {
 	prometheus.MustRegister(http_requests_rest_api)
+	ConfigInit()
 }
 
 // ConfigInit sets up configuration management using viper
 func ConfigInit() {
-
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
 	viper.SetConfigType("yaml")
