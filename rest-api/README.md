@@ -1,5 +1,20 @@
 # Simple REST API in Go
 
+This is a simple (demo) REST server with very minimal functionality:
+* get all person records defined so far (GET)
+* get a specific person record (GET)
+* create a new person record (POST)
+* delete a specific person record (DELETE)
+
+This go program utilizes following modules:
+* gorilla/mux (for request routing)
+* logrus (for logging)
+* viper (for configuration management)
+* prometheus (for exposing a Prometheus metrics monitoring endpoint)
+
+The program has been developed utilizing test-driven-development (TDD)
+
+
 ### Testing the API
 
 Start the REST API in one terminal (or send it to background):
