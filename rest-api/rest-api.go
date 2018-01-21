@@ -62,6 +62,7 @@ func ConfigInit() {
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
 	viper.SetConfigType("yaml")
+	viper.SetDefault("port", "8080")
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Fatal(err)
