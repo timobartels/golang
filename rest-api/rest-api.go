@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -21,11 +22,21 @@ type Person struct {
 var people []Person
 var port string
 
+// Defining the custom Prometheus metrics
+// * http_requests_total_rest_api
+// * http_request_duration
 var (
-	http_requests_rest_api = prometheus.NewCounterVec(
+	http_requests_total_rest_api = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "http_requests_rest_api",
+			Name: "http_requests_total_rest_api",
 			Help: "Number of http requests for rest-api.",
+		},
+		[]string{"host"},
+	)
+	http_request_duration_seconds = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "http_request_duration_seconds",
+			Help: "Duration of the last request to rest-api.",
 		},
 		[]string{"host"},
 	)
@@ -41,7 +52,8 @@ func main() {
 }
 
 func init() {
-	prometheus.MustRegister(http_requests_rest_api)
+	prometheus.MustRegister(http_request_duration_seconds)
+	prometheus.MustRegister(http_requests_total_rest_api)
 	ConfigInit()
 }
 
@@ -71,15 +83,18 @@ func Routes() http.Handler {
 
 // GetPeople will output all entries in the people slice
 func GetPeople(w http.ResponseWriter, r *http.Request) {
-	http_requests_rest_api.With(prometheus.Labels{"host": "samplehost"}).Inc()
+	requestStart := time.Now()
+	http_requests_total_rest_api.With(prometheus.Labels{"host": "samplehost"}).Inc()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(people)
+	requestDuration := time.Since(requestStart).Seconds()
+	http_request_duration_seconds.With(prometheus.Labels{"host": "samplehost"}).Set(float64(requestDuration))
 }
 
 // GetPerson will output only a specific entry
 func GetPerson(w http.ResponseWriter, r *http.Request) {
-	http_requests_rest_api.With(prometheus.Labels{"host": "samplehost"}).Inc()
+	http_requests_total_rest_api.With(prometheus.Labels{"host": "samplehost"}).Inc()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	params := mux.Vars(r)
 	for _, item := range people {
@@ -93,7 +108,7 @@ func GetPerson(w http.ResponseWriter, r *http.Request) {
 
 // CreatePerson will create a new entry in the people slice
 func CreatePerson(w http.ResponseWriter, r *http.Request) {
-	http_requests_rest_api.With(prometheus.Labels{"host": "samplehost"}).Inc()
+	http_requests_total_rest_api.With(prometheus.Labels{"host": "samplehost"}).Inc()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	params := mux.Vars(r)
 	var person Person
@@ -106,7 +121,7 @@ func CreatePerson(w http.ResponseWriter, r *http.Request) {
 
 // DeletePerson will reshuffle the people slice to overwrite an entry
 func DeletePerson(w http.ResponseWriter, r *http.Request) {
-	http_requests_rest_api.With(prometheus.Labels{"host": "samplehost"}).Inc()
+	http_requests_total_rest_api.With(prometheus.Labels{"host": "samplehost"}).Inc()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	params := mux.Vars(r)
 	for index, item := range people {
