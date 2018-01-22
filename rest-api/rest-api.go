@@ -85,18 +85,18 @@ func Routes() http.Handler {
 // GetPeople will output all entries in the people slice
 func GetPeople(w http.ResponseWriter, r *http.Request) {
 	requestStart := time.Now()
-	http_requests_total_rest_api.With(prometheus.Labels{"path": "people", "method": "GET"}).Inc()
+	http_requests_total_rest_api.With(prometheus.Labels{"path": "people", "method": r.Method}).Inc()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(people)
 	requestDuration := time.Since(requestStart).Seconds()
-	http_request_duration_seconds.With(prometheus.Labels{"path": "people", "method": "GET"}).Set(float64(requestDuration))
+	http_request_duration_seconds.With(prometheus.Labels{"path": "people", "method": r.Method}).Set(float64(requestDuration))
 }
 
 // GetPerson will output only a specific entry
 func GetPerson(w http.ResponseWriter, r *http.Request) {
 	requestStart := time.Now()
-	http_requests_total_rest_api.With(prometheus.Labels{"path": "people", "method": "GET"}).Inc()
+	http_requests_total_rest_api.With(prometheus.Labels{"path": "people", "method": r.Method}).Inc()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	params := mux.Vars(r)
 	for _, item := range people {
@@ -104,7 +104,7 @@ func GetPerson(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(item)
 			w.WriteHeader(http.StatusOK)
 			requestDuration := time.Since(requestStart).Seconds()
-			http_request_duration_seconds.With(prometheus.Labels{"path": "people", "method": "GET"}).Set(float64(requestDuration))
+			http_request_duration_seconds.With(prometheus.Labels{"path": "people", "method": r.Method}).Set(float64(requestDuration))
 			return
 		}
 	}
@@ -113,7 +113,7 @@ func GetPerson(w http.ResponseWriter, r *http.Request) {
 // CreatePerson will create a new entry in the people slice
 func CreatePerson(w http.ResponseWriter, r *http.Request) {
 	requestStart := time.Now()
-	http_requests_total_rest_api.With(prometheus.Labels{"path": "people", "method": "POST"}).Inc()
+	http_requests_total_rest_api.With(prometheus.Labels{"path": "people", "method": r.Method}).Inc()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	params := mux.Vars(r)
 	var person Person
@@ -123,13 +123,13 @@ func CreatePerson(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(people)
 	requestDuration := time.Since(requestStart).Seconds()
-	http_request_duration_seconds.With(prometheus.Labels{"path": "people", "method": "POST"}).Set(float64(requestDuration))
+	http_request_duration_seconds.With(prometheus.Labels{"path": "people", "method": r.Method}).Set(float64(requestDuration))
 }
 
 // DeletePerson will reshuffle the people slice to overwrite an entry
 func DeletePerson(w http.ResponseWriter, r *http.Request) {
 	requestStart := time.Now()
-	http_requests_total_rest_api.With(prometheus.Labels{"path": "people", "method": "DELETE"}).Inc()
+	http_requests_total_rest_api.With(prometheus.Labels{"path": "people", "method": r.Method}).Inc()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	params := mux.Vars(r)
 	for index, item := range people {
@@ -141,5 +141,5 @@ func DeletePerson(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(people)
 	requestDuration := time.Since(requestStart).Seconds()
-	http_request_duration_seconds.With(prometheus.Labels{"path": "people", "method": "DELETE"}).Set(float64(requestDuration))
+	http_request_duration_seconds.With(prometheus.Labels{"path": "people", "method": r.Method}).Set(float64(requestDuration))
 }
