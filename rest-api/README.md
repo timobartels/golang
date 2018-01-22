@@ -19,7 +19,7 @@ The program has been developed utilizing test-driven-development (TDD)
 * If you have a working Golang installation, you can simply use following command:  
 ```go run rest-api.go &```  
 
-* You can compile the code via a Dockerfile and create/run a docker container of the rest-api server:  
+* You can compile the code via a Dockerfile and create/run a docker container of the rest-api server (requires Docker version that supports multi-stage builds, ie. Docker CE 17*):  
 ```docker build -t local/rest-server:1.0 . ```  
 ```docker run -d -p 8080:8080 local/rest-server:1.0```  
 
