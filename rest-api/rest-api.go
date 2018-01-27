@@ -69,6 +69,18 @@ func ConfigInit() {
 	}
 	port = viper.GetString("port")
 	port = ":" + port
+	loglevel := viper.GetString("loglevel")
+	switch loglevel {
+	case "warn":
+		log.SetLevel(log.WarnLevel)
+	case "debug":
+		log.SetLevel(log.DebugLevel)
+	}
+	logformat := viper.GetString("logformat")
+	if logformat == "json" {
+		log.SetFormatter(&log.JSONFormatter{})
+		log.Info("Logging to stdout in JSON format.")
+	}
 }
 
 // Routes sets up the routes for our API
@@ -79,11 +91,13 @@ func Routes() http.Handler {
 	router.HandleFunc("/people/{id}", CreatePerson).Methods("POST")
 	router.HandleFunc("/people/{id}", DeletePerson).Methods("DELETE")
 	router.Path("/metrics").Handler(prometheus.Handler())
+	log.Info("Routes initialized.")
 	return router
 }
 
 // GetPeople will output all entries in the people slice
 func GetPeople(w http.ResponseWriter, r *http.Request) {
+	log.WithFields(log.Fields{"method": r.Method, "endpoint": r.URL.Path}).Info("Reveived new request.")
 	requestStart := time.Now()
 	http_requests_total_rest_api.With(prometheus.Labels{"path": r.URL.Path, "method": r.Method}).Inc()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -95,6 +109,7 @@ func GetPeople(w http.ResponseWriter, r *http.Request) {
 
 // GetPerson will output only a specific entry
 func GetPerson(w http.ResponseWriter, r *http.Request) {
+	log.WithFields(log.Fields{"method": r.Method, "endpoint": r.URL.Path}).Info("Reveived new request.")
 	requestStart := time.Now()
 	http_requests_total_rest_api.With(prometheus.Labels{"path": r.URL.Path, "method": r.Method}).Inc()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -112,6 +127,7 @@ func GetPerson(w http.ResponseWriter, r *http.Request) {
 
 // CreatePerson will create a new entry in the people slice
 func CreatePerson(w http.ResponseWriter, r *http.Request) {
+	log.WithFields(log.Fields{"method": r.Method, "endpoint": r.URL.Path}).Info("Reveived new request.")
 	requestStart := time.Now()
 	http_requests_total_rest_api.With(prometheus.Labels{"path": r.URL.Path, "method": r.Method}).Inc()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -128,6 +144,7 @@ func CreatePerson(w http.ResponseWriter, r *http.Request) {
 
 // DeletePerson will reshuffle the people slice to overwrite an entry
 func DeletePerson(w http.ResponseWriter, r *http.Request) {
+	log.WithFields(log.Fields{"method": r.Method, "endpoint": r.URL.Path}).Info("Reveived new request.")
 	requestStart := time.Now()
 	http_requests_total_rest_api.With(prometheus.Labels{"path": r.URL.Path, "method": r.Method}).Inc()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
