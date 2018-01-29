@@ -1,4 +1,9 @@
 ---
+# port on where the REST API should listen
 port: 8080
+
+# log format - [json|stdout]
 logformat: json
+
+# log level - [debug|warn]
 loglevel: debug
