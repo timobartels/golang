@@ -12,6 +12,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+// App is the application
+type App struct {
+	Router *mux.Router
+}
+
 // Person struct to store the data for the API
 type Person struct {
 	ID        string `json:"id,omitempty"`
@@ -44,11 +49,14 @@ var (
 
 func main() {
 
-	log.Info("HTTP server started and listening on port: ", port)
+	// Creating application instance
+	a := App{}
 
-	// start our server
-	log.Fatal(http.ListenAndServe(port, Routes()))
+	// Initialize the REST server
+	a.Initialize()
 
+	// Start our server
+	a.Run(port)
 }
 
 func init() {
@@ -83,20 +91,28 @@ func ConfigInit() {
 	}
 }
 
-// Routes sets up the routes for our API
-func Routes() http.Handler {
-	router := mux.NewRouter()
-	router.HandleFunc("/people", GetPeople).Methods("GET")
-	router.HandleFunc("/people/{id}", GetPerson).Methods("GET")
-	router.HandleFunc("/people/{id}", CreatePerson).Methods("POST")
-	router.HandleFunc("/people/{id}", DeletePerson).Methods("DELETE")
-	router.Path("/metrics").Handler(prometheus.Handler())
+// InitRoutes initializes the routes for the REST server
+func (a *App) InitRoutes() {
+	a.Router.HandleFunc("/people", a.GetPeople).Methods("GET")
+	a.Router.HandleFunc("/people/{id}", a.GetPerson).Methods("GET")
+	a.Router.HandleFunc("/people/{id}", a.CreatePerson).Methods("POST")
+	a.Router.HandleFunc("/people/{id}", a.DeletePerson).Methods("DELETE")
+	a.Router.Path("/metrics").Handler(prometheus.Handler())
 	log.Info("Routes initialized.")
-	return router
+}
+
+func (a *App) Run(port string) {
+	log.Info("Starting HTTP server on port: ", port)
+	log.Fatal(http.ListenAndServe(port, a.Router))
+}
+
+func (a *App) Initialize() {
+	a.Router = mux.NewRouter()
+	a.InitRoutes()
 }
 
 // GetPeople will output all entries in the people slice
-func GetPeople(w http.ResponseWriter, r *http.Request) {
+func (a *App) GetPeople(w http.ResponseWriter, r *http.Request) {
 	log.WithFields(log.Fields{"method": r.Method, "endpoint": r.URL.Path}).Info("Reveived new request.")
 	requestStart := time.Now()
 	http_requests_total_rest_api.With(prometheus.Labels{"path": r.URL.Path, "method": r.Method}).Inc()
@@ -108,7 +124,7 @@ func GetPeople(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetPerson will output only a specific entry
-func GetPerson(w http.ResponseWriter, r *http.Request) {
+func (a *App) GetPerson(w http.ResponseWriter, r *http.Request) {
 	log.WithFields(log.Fields{"method": r.Method, "endpoint": r.URL.Path}).Info("Reveived new request.")
 	requestStart := time.Now()
 	http_requests_total_rest_api.With(prometheus.Labels{"path": r.URL.Path, "method": r.Method}).Inc()
@@ -126,7 +142,7 @@ func GetPerson(w http.ResponseWriter, r *http.Request) {
 }
 
 // CreatePerson will create a new entry in the people slice
-func CreatePerson(w http.ResponseWriter, r *http.Request) {
+func (a *App) CreatePerson(w http.ResponseWriter, r *http.Request) {
 	log.WithFields(log.Fields{"method": r.Method, "endpoint": r.URL.Path}).Info("Reveived new request.")
 	requestStart := time.Now()
 	http_requests_total_rest_api.With(prometheus.Labels{"path": r.URL.Path, "method": r.Method}).Inc()
@@ -143,7 +159,7 @@ func CreatePerson(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeletePerson will reshuffle the people slice to overwrite an entry
-func DeletePerson(w http.ResponseWriter, r *http.Request) {
+func (a *App) DeletePerson(w http.ResponseWriter, r *http.Request) {
 	log.WithFields(log.Fields{"method": r.Method, "endpoint": r.URL.Path}).Info("Reveived new request.")
 	requestStart := time.Now()
 	http_requests_total_rest_api.With(prometheus.Labels{"path": r.URL.Path, "method": r.Method}).Inc()

@@ -3,78 +3,66 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestConfigInit(t *testing.T) {
-
-	ConfigInit()
-	assert.Equal(t, port, ":8080")
-}
+var app App
 
 func TestGetPeople(t *testing.T) {
 
-	router := Routes()
-	url := "/people"
-	statusCode := 200
-	people = append(people, Person{ID: "1", Firstname: "John", Lastname: "Doe"})
-
-	req := httptest.NewRequest("GET", url, nil)
-	req.Header.Set("content-type", "application/json")
-	res := httptest.NewRecorder()
-	router.ServeHTTP(res, req)
-
-	assert.Equal(t, statusCode, res.Code)
-	assert.JSONEq(t, string(res.Body.Bytes()), `[{"id":"1","firstname":"John","lastname":"Doe"}]`)
+	app = App{}
+	app.Initialize()
+	req, err := http.NewRequest("GET", "/people", nil)
+	if err != nil {
+		t.FailNow()
+	}
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(app.GetPeople)
+	handler.ServeHTTP(rr, req)
+	assert.Equal(t, rr.Code, 200, rr.Code)
 }
 
 func TestCreatePerson(t *testing.T) {
 
-	router := Routes()
-	url := "/people/2"
-	statusCode := 201
-
 	data := map[string]string{"firstname": "Jane", "lastname": "Doe"}
 	jsondata, _ := json.Marshal(data)
 
-	req := httptest.NewRequest("POST", url, bytes.NewBuffer(jsondata))
-	req.Header.Set("content-type", "application/json")
-	res := httptest.NewRecorder()
-	router.ServeHTTP(res, req)
-
-	assert.Equal(t, statusCode, res.Code)
-	assert.JSONEq(t, string(res.Body.Bytes()), `[{"id":"1","firstname":"John","lastname":"Doe"},{"id":"2","firstname":"Jane","lastname":"Doe"}]`)
+	req, err := http.NewRequest("POST", "/people/1", bytes.NewBuffer(jsondata))
+	if err != nil {
+		t.FailNow()
+	}
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(app.CreatePerson)
+	handler.ServeHTTP(rr, req)
+	assert.Equal(t, rr.Code, 201, rr.Code)
+	assert.JSONEq(t, string(rr.Body.Bytes()), `[{"firstname":"Jane","lastname":"Doe"}]`)
 }
 
 func TestGetPerson(t *testing.T) {
 
-	router := Routes()
-	url := "/people/1"
-	statusCode := 200
-
-	req := httptest.NewRequest("GET", url, nil)
-	req.Header.Set("content-type", "application/json")
-	res := httptest.NewRecorder()
-	router.ServeHTTP(res, req)
-
-	assert.Equal(t, statusCode, res.Code)
-	assert.JSONEq(t, string(res.Body.Bytes()), `{"id":"1","firstname":"John","lastname":"Doe"}`)
+	req, err := http.NewRequest("GET", "/people/1", nil)
+	if err != nil {
+		t.FailNow()
+	}
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(app.GetPerson)
+	handler.ServeHTTP(rr, req)
+	assert.Equal(t, rr.Code, 200, rr.Code)
 }
 
 func TestDeletePerson(t *testing.T) {
 
-	router := Routes()
-	url := "/people/2"
-	statusCode := 201
-
-	req := httptest.NewRequest("DELETE", url, nil)
-	req.Header.Set("content-type", "application/json")
-	res := httptest.NewRecorder()
-	router.ServeHTTP(res, req)
-
-	assert.Equal(t, statusCode, res.Code)
-	assert.NotContains(t, string(res.Body.Bytes()), `[{"id":"2","firstname":"Jane","lastname":"Doe"}]`)
+	req, err := http.NewRequest("DELETE", "/people/1", nil)
+	if err != nil {
+		t.FailNow()
+	}
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(app.DeletePerson)
+	handler.ServeHTTP(rr, req)
+	assert.Equal(t, rr.Code, 201, rr.Code)
+	assert.NotContains(t, string(rr.Body.Bytes()), `[{"id":"1","firstname":"Jane","lastname":"Doe"}]`)
 }
