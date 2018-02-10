@@ -6,4 +6,4 @@ port: 8080
 logformat: json
 
 # log level - [debug|warn]
-loglevel: debug
+loglevel: warn

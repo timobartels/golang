@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"encoding/json"
@@ -47,18 +47,6 @@ var (
 	)
 )
 
-func main() {
-
-	// Creating application instance
-	a := App{}
-
-	// Initialize the REST server
-	a.Initialize()
-
-	// Start our server
-	a.Run(port)
-}
-
 func init() {
 	prometheus.MustRegister(http_request_duration_seconds)
 	prometheus.MustRegister(http_requests_total_rest_api)
@@ -101,7 +89,7 @@ func (a *App) InitRoutes() {
 	log.Info("Routes initialized.")
 }
 
-func (a *App) Run(port string) {
+func (a *App) Run() {
 	log.Info("Starting HTTP server on port: ", port)
 	log.Fatal(http.ListenAndServe(port, a.Router))
 }
