@@ -40,10 +40,12 @@ var (
 	)
 )
 
+//NewRestApp creates a new REST application instance
 func NewRestApp(people *model.People) RestApp {
 	return RestApp{people}
 }
 
+//Server creates a new REST API server instance
 func (app *RestApp) Server() *http.Server {
 	router := mux.NewRouter()
 	router.HandleFunc("/people", app.GetPeople).Methods("GET")
@@ -64,18 +66,23 @@ func (app *RestApp) Server() *http.Server {
 func init() {
 	prometheus.MustRegister(http_request_duration_seconds)
 	prometheus.MustRegister(http_requests_total_rest_api)
-	ConfigInit()
+}
+
+// NewStore creates a new instance store that holds the person data
+func NewStore() *model.People {
+	people := &model.People{}
+	return people
 }
 
 // ConfigInit sets up configuration management using viper
-func ConfigInit() {
-	viper.SetConfigName("config")
+func ConfigInit(config string) {
+	viper.SetConfigName(config)
 	viper.AddConfigPath(".")
 	viper.SetConfigType("yaml")
 	viper.SetDefault("port", "8080")
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Fatal(err)
+		log.Warn(err)
 	}
 	port = viper.GetString("port")
 	port = ":" + port
@@ -90,7 +97,9 @@ func ConfigInit() {
 	if logformat == "json" {
 		log.SetFormatter(&log.JSONFormatter{})
 		log.Info("Logging to stdout in JSON format.")
+		return
 	}
+	log.Info("Logging to stdout in text format.")
 }
 
 // GetPeople will output all entries in the people slice

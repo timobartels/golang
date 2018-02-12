@@ -8,12 +8,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/timobartels/golang/rest-api/model"
 )
 
 func createDummyEntry() *RestApp {
 
-	people := model.NewStore()
+	people := NewStore()
 	app := NewRestApp(people)
 
 	data := map[string]string{"firstname": "Jane", "lastname": "Doe"}
@@ -25,9 +24,30 @@ func createDummyEntry() *RestApp {
 	return &app
 }
 
+func TestConfigInitJSONWarn(t *testing.T) {
+
+	var configFile string
+	configFile = "configjson"
+	ConfigInit(configFile)
+}
+
+func TestConfigInitTextDebug(t *testing.T) {
+
+	var configFile string
+	configFile = "configdebug"
+	ConfigInit(configFile)
+}
+
+func TestConfigInitError(t *testing.T) {
+
+	var configFile string
+	configFile = "missing"
+	ConfigInit(configFile)
+}
+
 func TestGetPeople(t *testing.T) {
 
-	people := model.NewStore()
+	people := NewStore()
 	app := NewRestApp(people)
 
 	req, err := http.NewRequest("GET", "/people", nil)
@@ -42,7 +62,7 @@ func TestGetPeople(t *testing.T) {
 
 func TestCreatePerson(t *testing.T) {
 
-	people := model.NewStore()
+	people := NewStore()
 	app := NewRestApp(people)
 
 	data := map[string]string{"firstname": "Jane", "lastname": "Doe"}
@@ -91,7 +111,7 @@ func TestDeletePerson(t *testing.T) {
 
 func TestServerCreated(t *testing.T) {
 
-	people := model.NewStore()
+	people := NewStore()
 	app := NewRestApp(people)
 
 	assert.NotNil(t, app.Server())
