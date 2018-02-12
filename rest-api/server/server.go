@@ -7,24 +7,17 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/timobartels/golang/rest-api/model"
 
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-// App is the application
-type App struct {
-	Router *mux.Router
+// RestApp is holding the rest logic and handlers
+type RestApp struct {
+	people *model.People
 }
 
-// Person struct to store the data for the API
-type Person struct {
-	ID        string `json:"id,omitempty"`
-	Firstname string `json:"firstname,omitempty"`
-	Lastname  string `json:"lastname,omitempty"`
-}
-
-var people []Person
 var port string
 
 // Defining the custom Prometheus metrics
@@ -46,6 +39,27 @@ var (
 		[]string{"path", "method"},
 	)
 )
+
+func NewRestApp(people *model.People) RestApp {
+	return RestApp{people}
+}
+
+func (app *RestApp) Server() *http.Server {
+	router := mux.NewRouter()
+	router.HandleFunc("/people", app.GetPeople).Methods("GET")
+	router.HandleFunc("/people/{id}", app.GetPerson).Methods("GET")
+	router.HandleFunc("/people/{id}", app.CreatePerson).Methods("POST")
+	router.HandleFunc("/people/{id}", app.DeletePerson).Methods("DELETE")
+	router.Path("/metrics").Handler(prometheus.Handler())
+
+	server := &http.Server{
+		Handler:      router,
+		Addr:         "127.0.0.1" + port,
+		WriteTimeout: 30 * time.Second,
+		ReadTimeout:  30 * time.Second,
+	}
+	return server
+}
 
 func init() {
 	prometheus.MustRegister(http_request_duration_seconds)
@@ -79,46 +93,26 @@ func ConfigInit() {
 	}
 }
 
-// InitRoutes initializes the routes for the REST server
-func (a *App) InitRoutes() {
-	a.Router.HandleFunc("/people", a.GetPeople).Methods("GET")
-	a.Router.HandleFunc("/people/{id}", a.GetPerson).Methods("GET")
-	a.Router.HandleFunc("/people/{id}", a.CreatePerson).Methods("POST")
-	a.Router.HandleFunc("/people/{id}", a.DeletePerson).Methods("DELETE")
-	a.Router.Path("/metrics").Handler(prometheus.Handler())
-	log.Info("Routes initialized.")
-}
-
-func (a *App) Run() {
-	log.Info("Starting HTTP server on port: ", port)
-	log.Fatal(http.ListenAndServe(port, a.Router))
-}
-
-func (a *App) Initialize() {
-	a.Router = mux.NewRouter()
-	a.InitRoutes()
-}
-
 // GetPeople will output all entries in the people slice
-func (a *App) GetPeople(w http.ResponseWriter, r *http.Request) {
+func (app *RestApp) GetPeople(w http.ResponseWriter, r *http.Request) {
 	log.WithFields(log.Fields{"method": r.Method, "endpoint": r.URL.Path}).Info("Reveived new request.")
 	requestStart := time.Now()
 	http_requests_total_rest_api.With(prometheus.Labels{"path": r.URL.Path, "method": r.Method}).Inc()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(people)
+	json.NewEncoder(w).Encode(app.people)
 	requestDuration := time.Since(requestStart).Seconds()
 	http_request_duration_seconds.With(prometheus.Labels{"path": r.URL.Path, "method": r.Method}).Set(float64(requestDuration))
 }
 
 // GetPerson will output only a specific entry
-func (a *App) GetPerson(w http.ResponseWriter, r *http.Request) {
+func (app *RestApp) GetPerson(w http.ResponseWriter, r *http.Request) {
 	log.WithFields(log.Fields{"method": r.Method, "endpoint": r.URL.Path}).Info("Reveived new request.")
 	requestStart := time.Now()
 	http_requests_total_rest_api.With(prometheus.Labels{"path": r.URL.Path, "method": r.Method}).Inc()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	params := mux.Vars(r)
-	for _, item := range people {
+	for _, item := range app.people.Store {
 		if item.ID == params["id"] {
 			json.NewEncoder(w).Encode(item)
 			w.WriteHeader(http.StatusOK)
@@ -130,37 +124,37 @@ func (a *App) GetPerson(w http.ResponseWriter, r *http.Request) {
 }
 
 // CreatePerson will create a new entry in the people slice
-func (a *App) CreatePerson(w http.ResponseWriter, r *http.Request) {
+func (app *RestApp) CreatePerson(w http.ResponseWriter, r *http.Request) {
 	log.WithFields(log.Fields{"method": r.Method, "endpoint": r.URL.Path}).Info("Reveived new request.")
 	requestStart := time.Now()
 	http_requests_total_rest_api.With(prometheus.Labels{"path": r.URL.Path, "method": r.Method}).Inc()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	params := mux.Vars(r)
-	var person Person
+	var person model.Person
 	_ = json.NewDecoder(r.Body).Decode(&person)
 	person.ID = params["id"]
-	people = append(people, person)
+	app.people.Store = append(app.people.Store, person)
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(people)
+	json.NewEncoder(w).Encode(app.people)
 	requestDuration := time.Since(requestStart).Seconds()
 	http_request_duration_seconds.With(prometheus.Labels{"path": r.URL.Path, "method": r.Method}).Set(float64(requestDuration))
 }
 
 // DeletePerson will reshuffle the people slice to overwrite an entry
-func (a *App) DeletePerson(w http.ResponseWriter, r *http.Request) {
+func (app *RestApp) DeletePerson(w http.ResponseWriter, r *http.Request) {
 	log.WithFields(log.Fields{"method": r.Method, "endpoint": r.URL.Path}).Info("Reveived new request.")
 	requestStart := time.Now()
 	http_requests_total_rest_api.With(prometheus.Labels{"path": r.URL.Path, "method": r.Method}).Inc()
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	params := mux.Vars(r)
-	for index, item := range people {
+	for index, item := range app.people.Store {
 		if item.ID == params["id"] {
-			people = append(people[:index], people[index+1:]...)
+			app.people.Store = append(app.people.Store[:index], app.people.Store[index+1:]...)
 			break
 		}
 	}
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(people)
+	json.NewEncoder(w).Encode(app.people)
 	requestDuration := time.Since(requestStart).Seconds()
 	http_request_duration_seconds.With(prometheus.Labels{"path": r.URL.Path, "method": r.Method}).Set(float64(requestDuration))
 }
