@@ -56,7 +56,7 @@ func (app *RestApp) Server() *http.Server {
 
 	server := &http.Server{
 		Handler:      router,
-		Addr:         "127.0.0.1" + port,
+		Addr:         port,
 		WriteTimeout: 30 * time.Second,
 		ReadTimeout:  30 * time.Second,
 	}

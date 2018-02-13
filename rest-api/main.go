@@ -9,10 +9,10 @@ import (
 var config string
 
 func main() {
-	people := server.NewStore()
+	backend := server.NewStore()
 	config = "config"
 	server.ConfigInit(config)
 
-	restApp := server.NewRestApp(people)
+	restApp := server.NewRestApp(backend)
 	log.Fatal(restApp.Server().ListenAndServe())
 }
