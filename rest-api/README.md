@@ -1,4 +1,5 @@
-# Simple REST API in Go (tested with Go 1.9.2)
+# Simple REST API in Go  
+(tested with Go 1.9.2 & 1.10.0)  
 
 This is a simple (demo) REST server with very minimal functionality:
 * get all person records defined so far (GET)

@@ -1,5 +1,5 @@
 # Builder image, where we compile/build the executable.
-FROM golang:1.9.2 AS builder
+FROM golang:1.10 AS builder
 WORKDIR /go/src/github.com/timobartels/rest-api
 COPY . .
 WORKDIR /go/src/github.com/timobartels/rest-api
